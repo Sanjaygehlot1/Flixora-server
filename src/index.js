@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 import DBconnect from "./DataBase/DBconnection.js";
 import dotenv from 'dotenv'
 import express from "express"
-import { error } from "console";
+import {app} from './app.js'
 
-const app = express()
+
 
 dotenv.config({
     path: './env'
