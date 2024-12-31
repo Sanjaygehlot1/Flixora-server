@@ -281,7 +281,7 @@ const UpdateUserDetails = AsyncHandler(async (req, res) => {
         {
             new: true
         }
-    )
+    ).select("-password")
 
     return res
         .status(200)
@@ -316,7 +316,7 @@ const UpdateAvatar = AsyncHandler(async (req, res) => {
         {
             new: true
         }
-    )
+    ).select("-password")
 
     return res
         .status(200)
@@ -349,7 +349,7 @@ const UpdateCoverImage = AsyncHandler(async (req, res) => {
         {
             new: true
         }
-    )
+    ).select("-password")
 
     return res
         .status(200)
