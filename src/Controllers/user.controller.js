@@ -132,7 +132,7 @@ const LoginUser = AsyncHandler(async (req, res) => {
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
     const options = {
-        httponly: true,
+        Httponly: true,
         secure: true
     }
 
@@ -360,6 +360,79 @@ const UpdateCoverImage = AsyncHandler(async (req, res) => {
         ))
 })
 
+const GetChannelDetails =AsyncHandler(async (req,res)=>{
+    const {username} = req.params
+
+    if(!username.trim()){
+        throw new ApiError(401, "Invalid Username")
+    }
+
+    const channel =await  User.aggregate([
+        {
+            $match:{
+                username: username
+            }
+        },
+        {
+           $lookup:{
+            from: "subscriptions",// Subscription model becomes subscriptions in database
+            localField: "_id",
+            foreignField: "channel",
+            as: "subscribers"
+           } 
+        },
+        {
+            $lookup:{
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscribers",
+                as:"subscribedTo"
+            }
+        },
+        {
+            $addFields:{
+                subscribersCount:{
+                    $size:"$subscribers"
+                },
+                subscribedToCount:{
+                    $size:"$subscribedTo"
+                },
+                isSubscribed:{
+                    $cond:{
+                        if: {$in:[req.user?._id,"$subscribers.subscribers"]},
+                        then:true,
+                        else:false
+                    }
+                }
+            }
+        },
+        {
+         $project:{
+            fullname:1,
+            email:1,
+            isSubscribed:1,
+            subscribedToCount:1,
+            subscribersCount:1,
+            avatar:1,
+            coverimage:1
+         }   
+        }
+    ])
+
+    if (!channel?.length) {
+        throw new ApiError(404, "channel does not exists")
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(
+        200,
+        channel,
+        "Channel details fetched Successfully"
+    ))
+
+})
+
 export {
     RegisterUser,
     LoginUser,
@@ -369,5 +442,6 @@ export {
     UpdateUserDetails,
     GetCurrentUser,
     UpdateAvatar,
-    UpdateCoverImage
+    UpdateCoverImage,
+    GetChannelDetails
 }

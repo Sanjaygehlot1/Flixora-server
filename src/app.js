@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import UserRoute from './Routes/user.Routes.js'
+import { router as VideoRouter} from './Routes/video.Routes.js'
 const app = express()
 
 app.use(cors({
@@ -15,5 +16,6 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 app.use("/api/v1/users", UserRoute)
+app.use("/api/v1/video",VideoRouter)
 
 export { app }
