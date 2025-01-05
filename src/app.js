@@ -4,7 +4,9 @@ import cookieParser from 'cookie-parser'
 import UserRoute from './Routes/user.Routes.js'
 import { router as VideoRouter} from './Routes/video.Routes.js'
 import { router as LikesRouter } from './Routes/like.Routes.js'
-
+import { router as CommentRouter } from './Routes/comment.Routes.js'
+import {router as SubscriptionRouter} from './Routes/subscription.Routes.js'
+import {router as TweetRouter} from './Routes/tweet.Routes.js'
 const app = express()
 
 app.use(cors({
@@ -20,5 +22,8 @@ app.use(cookieParser())
 app.use("/api/v1/users", UserRoute)
 app.use("/api/v1/video",VideoRouter)
 app.use("/api/v1/like",LikesRouter)
+app.use("/api/v1/comment",CommentRouter)
+app.use("/api/v1/subscription",SubscriptionRouter)
+app.use("/api/v1/tweet",TweetRouter)
 
 export { app }

@@ -80,7 +80,7 @@ const GetAllVideos = AsyncHandler(async (req, res) => {
     console.log("1st :: ", await Video.aggregate(pipeline))
 
     const video = await Video.aggregatePaginate(Video.aggregate(pipeline), options)
-    console.log("2nd :: ", video)
+    // console.log("2nd :: ", video)
     return res
         .status(200)
         .json(new ApiResponse(

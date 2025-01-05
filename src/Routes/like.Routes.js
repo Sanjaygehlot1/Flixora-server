@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { GetVideosLikedByUser, ToggleCommentLike, ToggleTweetLike, ToggleVideoLike } from "../Controllers/like.controller.js";
 import { AuthMiddleware } from "../Middlewares/Auth.middleware.js";
+
 const router = Router()
 
 router.route("/like-video/:videoId").patch(AuthMiddleware,ToggleVideoLike)

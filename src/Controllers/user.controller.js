@@ -4,6 +4,7 @@ import { User } from '../Models/users.model.js'
 import { uploadoncloudinary } from "../Utils/Cloudinary.js";
 import { ApiResponse } from "../Utils/ApiResponse.js";
 import jwt from 'jsonwebtoken'
+import mongoose from "mongoose";
 
 
 const RegisterUser = AsyncHandler(async (req, res) => {
@@ -385,7 +386,7 @@ const GetChannelDetails =AsyncHandler(async (req,res)=>{
             $lookup:{
                 from: "subscriptions",
                 localField: "_id",
-                foreignField: "subscribers",
+                foreignField: "subscriber",
                 as:"subscribedTo"
             }
         },
@@ -399,7 +400,7 @@ const GetChannelDetails =AsyncHandler(async (req,res)=>{
                 },
                 isSubscribed:{
                     $cond:{
-                        if: {$in:[req.user?._id,"$subscribers.subscribers"]},
+                        if: {$in:[new mongoose.Types.ObjectId(req.user?._id),"$subscribers.subscriber"]},
                         then:true,
                         else:false
                     }

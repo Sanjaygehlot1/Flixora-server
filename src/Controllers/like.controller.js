@@ -1,9 +1,7 @@
 import {Like} from "../Models/like.model.js"
-import { Video } from "../Models/video.model.js"
 import {AsyncHandler} from "../Utils/AsyncHandler.js"
 import {ApiError} from "../Utils/ApiError.js"
 import { ApiResponse } from "../Utils/ApiResponse.js"
-import mongoose, { mongo } from "mongoose"
 
 const ToggleVideoLike = AsyncHandler(async(req,res)=>{
     const {videoId}= req.params

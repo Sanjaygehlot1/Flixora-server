@@ -5,6 +5,14 @@ const TweetSchema = new Schema({
         type:String,
         required:true
     },
+    image:{
+        type:{
+            url:String,
+            public_id: String // in case of deletion of image from cloudinary
+        },
+        required: false
+
+    },
     owner:{
         type:Schema.Types.ObjectId,
         ref: "User"
