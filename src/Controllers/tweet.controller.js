@@ -4,6 +4,8 @@ import { AsyncHandler } from "../Utils/AsyncHandler.js"
 import { ApiError } from "../Utils/ApiError.js"
 import { ApiResponse } from "../Utils/ApiResponse.js"
 import { uploadoncloudinary } from "../Utils/Cloudinary.js";
+import { Like } from "../Models/like.model.js";
+
 
 const CreateTweet = AsyncHandler(async (req, res) => {
 
@@ -119,6 +121,10 @@ const DeleteTweet = AsyncHandler(async (req, res) => {
 
     const TweetToBeDeleted = await Tweet.findById(tweetId)
 
+    if (!TweetToBeDeleted) {
+        throw new ApiError(401, "Tweet Not Found")
+    }
+
     if (TweetToBeDeleted.owner.toString() !== req.user?._id.toString()) {
         throw new ApiError(401, "Unauthorized Access:: you don't have permission to edit this tweet")
     }
@@ -126,6 +132,8 @@ const DeleteTweet = AsyncHandler(async (req, res) => {
 
     try {
         await Tweet.findByIdAndDelete(tweetId)
+        await Like.deleteMany({tweet : new mongoose.Types.ObjectId(tweetId)})
+        
 
         return res
             .status(200)

@@ -234,8 +234,8 @@ const ChangeCurrentPassword = AsyncHandler(async (req, res) => {
         throw new ApiError(401, "Unauthorized Access")
     }
 
-    const ispassCorrect = await user.IsPasswordCorrect(newpassword)
-
+    const ispassCorrect = await user.IsPasswordCorrect(oldpassword)
+    console.log(ispassCorrect)
     if (!ispassCorrect) {
         throw new ApiError(401, "Old Password is Incorrect")
     }
@@ -247,7 +247,7 @@ const ChangeCurrentPassword = AsyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(
             200,
-            user.password,
+            newpassword,
             "Password Changed Successfully"
 
         ))
@@ -255,7 +255,7 @@ const ChangeCurrentPassword = AsyncHandler(async (req, res) => {
 })
 
 const GetCurrentUser = AsyncHandler(async (req, res) => {
-    return req
+    return res
         .status(200)
         .json(new ApiResponse(
             200,
@@ -267,7 +267,7 @@ const GetCurrentUser = AsyncHandler(async (req, res) => {
 const UpdateUserDetails = AsyncHandler(async (req, res) => {
     const { fullname, email } = req.body
 
-    if (fullname == "" || email == "") {
+    if (fullname === "" || email === "") {
         throw new ApiError(401, "All Fields are required")
     }
 

@@ -7,6 +7,8 @@ import { router as LikesRouter } from './Routes/like.Routes.js'
 import { router as CommentRouter } from './Routes/comment.Routes.js'
 import {router as SubscriptionRouter} from './Routes/subscription.Routes.js'
 import {router as TweetRouter} from './Routes/tweet.Routes.js'
+import {router as PlaylistRouter} from './Routes/playlist.Routes.js'
+import {router as DashBoardRouter} from './Routes/dashboard.Routes.js'
 const app = express()
 
 app.use(cors({
@@ -25,5 +27,7 @@ app.use("/api/v1/like",LikesRouter)
 app.use("/api/v1/comment",CommentRouter)
 app.use("/api/v1/subscription",SubscriptionRouter)
 app.use("/api/v1/tweet",TweetRouter)
+app.use("/api/v1/playlist",PlaylistRouter)
+app.use("/api/v1/dashboard",DashBoardRouter)
 
 export { app }

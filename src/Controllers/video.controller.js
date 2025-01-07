@@ -5,6 +5,7 @@ import { DeleteImageOnCloudinary, DeleteVideoOnCloudinary, uploadoncloudinary } 
 import { ApiResponse } from '../Utils/ApiResponse.js'
 import mongoose from "mongoose";
 import { User } from "../Models/users.model.js";
+import { Like } from "../Models/like.model.js";
 
 const GetAllVideos = AsyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, userId } = req.query;
@@ -358,6 +359,7 @@ const DeleteVideo = AsyncHandler(async (req, res) => {
 
     if (video.owner.toString() === req.user?._id.toString()) {
         await Video.findByIdAndDelete(videoId)
+        await Like.deleteMany({video : new mongoose.Types.ObjectId(videoId)})
 
         await DeleteVideoOnCloudinary(video.videoFile.public_id).then(() => {
             console.log("Video deleted from cloudinary")
