@@ -18,13 +18,9 @@ app.use(cors({
 
 app.use(express.json({ limit: "16kb" }))
 app.use(express.urlencoded({ extended: true, limit: "16kb" }))
-app.use(express.static("public"))
 app.use(cookieParser())
 
-// app.use("/api/v1/users", UserRoute)
-app.post("/api/v1/users/login",(req,res)=>{
-    res.send("Login Successfull")
-})
+app.use("/api/v1/users", UserRoute)
 app.use("/api/v1/video",VideoRouter)
 app.use("/api/v1/like",LikesRouter)
 app.use("/api/v1/comment",CommentRouter)
@@ -33,4 +29,5 @@ app.use("/api/v1/tweet",TweetRouter)
 app.use("/api/v1/playlist",PlaylistRouter)
 app.use("/api/v1/dashboard",DashBoardRouter)
 
+app.use(express.static("public"))
 export { app }
