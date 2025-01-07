@@ -19,78 +19,71 @@ const GetAllVideos = AsyncHandler(async (req, res) => {
                 index: "search-videos",
                 text: {
                     query: query,
-                    path: ["title", "description"]
-                }
-            }
-        })
+                    path: ["title", "description"],
+                },
+            },
+        });
     }
 
-
-
-    pipeline.push({
-        $match: {
-            isPublished: true
-        }
-    },)
-
-    pipeline.push({
-        $sort: {
-            "createdAt": -1
-        }
-    })
-    pipeline.push({
-        $lookup: {
-            from: "users",
-            localField: "owner",
-            foreignField: "_id",
-            as: "owner_details",
-        }
-    })
-    pipeline.push({
-        $addFields: {
-            owner_details: {
-                $first: "$owner_details",
+    pipeline.push(
+        {
+            $match: {
+                isPublished: true,
             },
         },
-    })
-    pipeline.push({
-        $project: {
-            _id: 1,
-            duration: 1,
-            title: 1,
-            description: 1,
-            videoFile: 1,
-            owner_details: {
-                username: "$owner_details.username",
-                avatar: "$owner_details.avatar",
+        {
+            $sort: {
+                createdAt: -1,
             },
-            views: 1,
-            thumbnail: 1,
-            createdAt: 1,
-            updatedAt: 1,
-            isPublished: 1,
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner_details",
+            },
+        },
+        {
+            $addFields: {
+                owner_details: {
+                    $first: "$owner_details",
+                },
+            },
+        },
+        {
+            $project: {
+                _id: 1,
+                duration: 1,
+                title: 1,
+                description: 1,
+                videoFile: 1,
+                owner_details: {
+                    username: "$owner_details.username",
+                    avatar: "$owner_details.avatar",
+                },
+                views: 1,
+                thumbnail: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                isPublished: 1,
+            },
         }
-    })
-
-
+    );
 
     const options = {
         page: parseInt(page, 10),
-        limit: parseInt(limit, 10)
-    }
-    console.log("1st :: ", await Video.aggregate(pipeline))
+        limit: parseInt(limit, 10),
+    };
 
-    const video = await Video.aggregatePaginate(Video.aggregate(pipeline), options)
-    // console.log("2nd :: ", video)
-    return res
-        .status(200)
-        .json(new ApiResponse(
-            200,
-            video,
-            "Videos fetched Successfully"
-        ))
+    console.log("Pipeline preview: ", pipeline);
 
-})
+    const video = await Video.aggregatePaginate(Video.aggregate(pipeline), options);
+
+    return res.status(200).json(
+        new ApiResponse(200, video, "Videos fetched Successfully")
+    );
+});
 
 const PublishVideo = AsyncHandler(async (req, res) => {
 
@@ -354,7 +347,7 @@ const DeleteVideo = AsyncHandler(async (req, res) => {
     const video = await Video.findById(videoId)
 
     if (!video) {
-        throw new ApiError(301, "Unable to delete video")
+        throw new ApiError(301, "Video not found")
     }
 
     if (video.owner.toString() === req.user?._id.toString()) {
@@ -393,8 +386,17 @@ const TogglePublishStatus = AsyncHandler(async (req, res) => {
 
     const video = await Video.findById(videoId)
 
-    const publishStatus = !video.isPublished
-    video.isPublished = publishStatus;
+    if (!video) {
+        throw new ApiError(301, "Video not found")
+    }
+
+    if(video.owner.toString() !== req.user?._id.toString()){
+        throw new ApiError(401, "Unauthorized Access:: you don't have permission to perform this operation")
+    }
+
+
+    const publishStatus = video?.isPublished
+    video.isPublished = !publishStatus;
 
     await video.save({ ValidateBeforeSave: false })
 
