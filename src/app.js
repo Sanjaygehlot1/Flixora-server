@@ -12,7 +12,7 @@ import {router as DashBoardRouter} from './Routes/dashboard.Routes.js'
 const app = express()
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: process.env.CORS_ORIGIN || "*",
     credentials: true
 }))
 
@@ -22,6 +22,9 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 app.use("/api/v1/users", UserRoute)
+app.post("/api/v1/users/login",(req,res)=>{
+    res.send("Login Successfull")
+})
 app.use("/api/v1/video",VideoRouter)
 app.use("/api/v1/like",LikesRouter)
 app.use("/api/v1/comment",CommentRouter)
