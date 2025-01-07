@@ -8,33 +8,31 @@ import { User } from "../Models/users.model.js";
 import { Like } from "../Models/like.model.js";
 
 const GetAllVideos = AsyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query } = req.query;
+    const { page = 1, limit = 10, query } = req.query
 
-    let pipeline = [];
+    let pipeline = []
 
-    // Perform the $search stage only if a query is provided
     if (query) {
         pipeline.push({
             $search: {
                 index: "search-videos",
                 text: {
                     query: query,
-                    path: ["title", "description"], // Fields to search in
+                    path: ["title", "description"],
                 },
             },
-        });
+        })
     }
 
-    // Add the rest of the pipeline stages
     pipeline.push(
         {
             $match: {
-                isPublished: true,
+                isPublished: true
             },
         },
         {
             $sort: {
-                createdAt: -1,
+                createdAt: -1
             },
         },
         {
@@ -48,7 +46,7 @@ const GetAllVideos = AsyncHandler(async (req, res) => {
         {
             $addFields: {
                 owner_details: {
-                    $first: "$owner_details",
+                    $first: "$owner_details"
                 },
             },
         },
@@ -70,28 +68,30 @@ const GetAllVideos = AsyncHandler(async (req, res) => {
                 isPublished: 1,
             },
         }
-    );
+    )
 
-    // Perform the search and filtering first
-    const searchResults = await Video.aggregate(pipeline);
+    const searchResults = await Video.aggregate(pipeline)
 
-    // Apply pagination manually
     const startIndex = (page - 1) * limit;
-    const paginatedResults = searchResults.slice(startIndex, startIndex + limit);
+    const paginatedResults = searchResults.slice(startIndex, startIndex + limit)
 
-    // Create a paginated response
     const paginatedResponse = {
         docs: paginatedResults,
         totalDocs: searchResults.length,
         totalPages: Math.ceil(searchResults.length / limit),
         currentPage: parseInt(page, 10),
         pageSize: parseInt(limit, 10),
-    };
+    }
 
-    return res.status(200).json(
-        new ApiResponse(200, paginatedResponse, "Videos fetched successfully")
-    );
-});
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                paginatedResponse,
+                "Videos fetched successfully")
+        )
+})
 
 
 const PublishVideo = AsyncHandler(async (req, res) => {
@@ -361,7 +361,7 @@ const DeleteVideo = AsyncHandler(async (req, res) => {
 
     if (video.owner.toString() === req.user?._id.toString()) {
         await Video.findByIdAndDelete(videoId)
-        await Like.deleteMany({video : new mongoose.Types.ObjectId(videoId)})
+        await Like.deleteMany({ video: new mongoose.Types.ObjectId(videoId) })
 
         await DeleteVideoOnCloudinary(video.videoFile.public_id).then(() => {
             console.log("Video deleted from cloudinary")
@@ -399,7 +399,7 @@ const TogglePublishStatus = AsyncHandler(async (req, res) => {
         throw new ApiError(301, "Video not found")
     }
 
-    if(video.owner.toString() !== req.user?._id.toString()){
+    if (video.owner.toString() !== req.user?._id.toString()) {
         throw new ApiError(401, "Unauthorized Access:: you don't have permission to perform this operation")
     }
 
