@@ -8,23 +8,24 @@ import { User } from "../Models/users.model.js";
 import { Like } from "../Models/like.model.js";
 
 const GetAllVideos = AsyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, userId } = req.query;
-    console.log(userId);
+    const { page = 1, limit = 10, query } = req.query;
 
-    const pipeline = [];
+    let pipeline = [];
 
+    // Perform the $search stage only if a query is provided
     if (query) {
         pipeline.push({
             $search: {
                 index: "search-videos",
                 text: {
                     query: query,
-                    path: ["title", "description"],
+                    path: ["title", "description"], // Fields to search in
                 },
             },
         });
     }
 
+    // Add the rest of the pipeline stages
     pipeline.push(
         {
             $match: {
@@ -71,19 +72,27 @@ const GetAllVideos = AsyncHandler(async (req, res) => {
         }
     );
 
-    const options = {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
+    // Perform the search and filtering first
+    const searchResults = await Video.aggregate(pipeline);
+
+    // Apply pagination manually
+    const startIndex = (page - 1) * limit;
+    const paginatedResults = searchResults.slice(startIndex, startIndex + limit);
+
+    // Create a paginated response
+    const paginatedResponse = {
+        docs: paginatedResults,
+        totalDocs: searchResults.length,
+        totalPages: Math.ceil(searchResults.length / limit),
+        currentPage: parseInt(page, 10),
+        pageSize: parseInt(limit, 10),
     };
 
-    console.log("Pipeline preview: ", pipeline);
-
-    const video = await Video.aggregatePaginate(Video.aggregate(pipeline), options);
-
     return res.status(200).json(
-        new ApiResponse(200, video, "Videos fetched Successfully")
+        new ApiResponse(200, paginatedResponse, "Videos fetched successfully")
     );
 });
+
 
 const PublishVideo = AsyncHandler(async (req, res) => {
 
