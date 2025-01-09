@@ -267,13 +267,10 @@ const GetCurrentUser = AsyncHandler(async (req, res) => {
 const UpdateUserDetails = AsyncHandler(async (req, res) => {
     const { fullname, email } = req.body
 
-    if (fullname === "" && email === "") {
+    if (!fullname && !email) {
         throw new ApiError(400, "Fullname or Email is required");
     }
     
-
-
-
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
