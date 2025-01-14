@@ -19,7 +19,7 @@ const AuthMiddleware = AsyncHandler(async (req,res,next)=>{
         req.user = user
         next()
     } catch (error) {
-        throw new ApiError(500 , "Invalid Access Token")
+        throw new ApiError(500 , error.message)
     }
 })
 

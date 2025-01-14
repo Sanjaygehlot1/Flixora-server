@@ -102,7 +102,6 @@ const PublishVideo = AsyncHandler(async (req, res) => {
         throw new ApiError(401, "Title and Description is Required")
     }
 
-    console.log(req.files)
     const VideoLocalPath = req.files?.video[0].path
 
     if (!VideoLocalPath) {
@@ -271,7 +270,6 @@ const GetVideoById = AsyncHandler(async (req, res) => {
             $inc: { views: 1 }
         }
     )
-    console.log(VideoAggreate[0])
     if (req.user?._id) {
         await User.findByIdAndUpdate(req.user?._id, {
             $addToSet: {
