@@ -108,7 +108,6 @@ const LoginUser = AsyncHandler(async (req, res) => {
 
 
     const { username, email, password } = req.body
-    console.log(username,email,password)
 
     if (!(username || email)) {
         throw new ApiError(400, "Username or Email is required")
@@ -117,7 +116,6 @@ const LoginUser = AsyncHandler(async (req, res) => {
     const user = await User.findOne({
         $or: [{ username }, { email }]
     })
-    console.log("User::",user)
 
     if (!user) {
         throw new ApiError(400, "User not found")
