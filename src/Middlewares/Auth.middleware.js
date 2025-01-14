@@ -4,7 +4,7 @@ import { AsyncHandler } from "../Utils/AsyncHandler.js"
 import jwt from 'jsonwebtoken'
 const AuthMiddleware = AsyncHandler(async (req,res,next)=>{
     try {
-        const token = await req.cookies?.accessToken || await req.header("Authorization").Replace("Bearer ","")
+        const token = await req.cookies?.accessToken 
 
         if(!token){
             throw new ApiError(401, "Unauthorized Access")
