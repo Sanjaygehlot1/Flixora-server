@@ -4,7 +4,7 @@ import { CheckSubscription, GetChannelsSubscribedTo, GetUserChannelSubscribers, 
 const router = Router()
 
 router.route("/toggle-subs/:ChannelId").patch(AuthMiddleware,ToggleSubscription)
-router.route("/check-sub/:channelId").patch(AuthMiddleware,CheckSubscription)
+router.route("/check-sub/:channelId").get(AuthMiddleware,CheckSubscription)
 router.route("/get-subs/:ChannelId").get(AuthMiddleware,GetUserChannelSubscribers)
 router.route("/subscribed-channels/:userId").get(AuthMiddleware,GetChannelsSubscribedTo)
 

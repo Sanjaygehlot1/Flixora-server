@@ -228,6 +228,7 @@ const CheckSubscription = AsyncHandler(async (req,res)=>{
         channel: new mongoose.Types.ObjectId(channelId)
       }
     )
+    console.log(SubscriptionStatus)
 
     if(SubscriptionStatus.length == 0){
       return res
