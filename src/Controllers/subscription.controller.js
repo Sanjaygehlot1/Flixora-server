@@ -211,8 +211,50 @@ const GetChannelsSubscribedTo = AsyncHandler(async (req, res) => {
 
 })
 
+const CheckSubscription = AsyncHandler(async (req,res)=>{
+    const {channelId} = req.params
+
+    if(!isValidObjectId(channelId)){
+      throw new ApiError(400,"Invalid ID format")
+    }
+  
+    if (!channelId) {
+      throw new ApiError(401, "channel Id not found")
+    }
+
+    const SubscriptionStatus = await Subscription.find(
+      {
+        subscriber: new mongoose.Types.ObjectId(req.user?._id),
+        channel: new mongoose.Types.ObjectId(channelId)
+      }
+    )
+
+    if(!SubscriptionStatus){
+      return res
+      .status(200)
+      .json(new ApiResponse(
+        200,
+        {status : false},
+        "Not Subscribed"
+      ))
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(
+      200,
+      {status : true},
+      "Subscribed"
+    ))
+
+
+
+
+})
+
 export {
   ToggleSubscription,
   GetUserChannelSubscribers,
-  GetChannelsSubscribedTo
+  GetChannelsSubscribedTo,
+  CheckSubscription
 }
