@@ -32,7 +32,7 @@ const ToggleSubscription = AsyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(
         200,
-        {},
+        {subscribed: false},
         "Channel Unsubscribed Successfully"
       ))
   }
@@ -51,7 +51,7 @@ const ToggleSubscription = AsyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(
         200,
-        subscribe,
+        {...subscribe, subscribed: true},
         "Channel Subscribed Successfully"
       ))
   } catch (error) {
