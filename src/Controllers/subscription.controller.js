@@ -229,7 +229,7 @@ const CheckSubscription = AsyncHandler(async (req,res)=>{
       }
     )
 
-    if(!SubscriptionStatus){
+    if(SubscriptionStatus.length == 0){
       return res
       .status(200)
       .json(new ApiResponse(
