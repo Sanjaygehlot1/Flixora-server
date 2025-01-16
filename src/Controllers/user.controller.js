@@ -162,7 +162,6 @@ const LogOutUser = AsyncHandler(async (req, res) => {
         }
     )
 
-    console.log(user)
 
     const options = {
         httponly: true,
@@ -237,7 +236,6 @@ const ChangeCurrentPassword = AsyncHandler(async (req, res) => {
     }
 
     const ispassCorrect = await user.IsPasswordCorrect(oldpassword)
-    console.log(ispassCorrect)
     if (!ispassCorrect) {
         throw new ApiError(401, "Old Password is Incorrect")
     }

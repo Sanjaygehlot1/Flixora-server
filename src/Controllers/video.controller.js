@@ -340,7 +340,6 @@ const UpdateVideo = AsyncHandler(async (req, res) => {
     // console.log(video)
 
     await DeleteImageOnCloudinary(video.thumbnail.public_id).then((status) => {
-        console.log("image deleted from cloudinary and Status ::", status)
     }).catch((err) => {
         console.log(err.message)
     })
@@ -393,14 +392,13 @@ const DeleteVideo = AsyncHandler(async (req, res) => {
         await Like.deleteMany({ video: new mongoose.Types.ObjectId(videoId) })
 
         await DeleteVideoOnCloudinary(video.videoFile.public_id).then(() => {
-            console.log("Video deleted from cloudinary")
         }).catch((err) => {
             console.log(err.message)
         })
 
         await DeleteImageOnCloudinary(video.thumbnail.public_id).then(() => {
-            console.log("image deleted from cloudinary")
         }).catch((err) => {
+            
             console.log(err.message)
         })
 

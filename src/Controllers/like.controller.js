@@ -184,7 +184,6 @@ const GetVideosLikedByUser = AsyncHandler(async (req,res)=>{
           }
         }
       ])
-      console.log(LikedVideos)
 
       return res
       .status(200)

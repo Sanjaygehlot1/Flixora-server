@@ -23,7 +23,6 @@ const ToggleSubscription = AsyncHandler(async (req, res) => {
       channel: new mongoose.Types.ObjectId(ChannelId)
     }
   )
-  console.log(AlreadySubscribed)
 
   if (Array.isArray(AlreadySubscribed) && AlreadySubscribed.length != 0) {
     await Subscription.findByIdAndDelete(AlreadySubscribed[0]._id)
@@ -228,7 +227,6 @@ const CheckSubscription = AsyncHandler(async (req,res)=>{
         channel: new mongoose.Types.ObjectId(channelId)
       }
     )
-    console.log(SubscriptionStatus)
 
     if(SubscriptionStatus.length == 0){
       return res

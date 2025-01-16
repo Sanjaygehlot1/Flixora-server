@@ -138,8 +138,6 @@ const UpdateComment = AsyncHandler(async (req, res) => {
     if (!comment_details) {
         throw new ApiError(402, "Comment Not Found")
     }
-    console.log(comment_details.owner.toString())
-    console.log(req.user?._id)
 
     if (comment_details.owner.toString() !== req.user?._id.toString()) {
         throw new ApiError(404, "Unauthorized Access:: You don't have permission to edit this comment")
@@ -220,7 +218,6 @@ const DeleteComment = AsyncHandler(async (req, res) => {
 
     ])
 
-    console.log(video_owner)
 
     if (
         comment.owner.toString() !== req.user?._id.toString()
