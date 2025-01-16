@@ -166,100 +166,105 @@ const GetVideoById = AsyncHandler(async (req, res) => {
 
     const VideoAggreate = await Video.aggregate([
         {
-            $match: {
-                _id: new mongoose.Types.ObjectId(videoId)
-            }
+          $match: {
+            _id: ObjectId("67828f3624c1fb38ab43013c")
+          }
         },
         {
-            $lookup: {
-                from: "users",
-                localField: "owner",
-                foreignField: "_id",
-                as: "owner_details",
-                pipeline: [
-                    {
-                        $lookup: {
-                            from: "subscriptions",
-                            localField: "_id",
-                            foreignField: "channel",
-                            as: "subscribers"
-                        }
-                    },
-                    {
-                        $addFields: {
-                            subscribersCount: {
-                                $size: "$subscribers"
-                            },
-                            isSubscribed: {
-                                $cond: {
-                                    if: { $in: [req.user?._id, "$subscribers.subscribers"] },
-                                    then: true,
-                                    else: false
-                                }
-                            }
-                        }
-                    },
-                    {
-                        $project: {
-                            username: 1,
-                            avatar: 1,
-                            subscribersCount: 1,
-                            isSubscribed: 1
-                        }
-                    },
-
-                ]
-            },
-
-        },
-        {
-            $addFields: {
-                owner_details: {
-                    $first: "$owner_details"
+          $lookup: {
+            from: "users",
+            localField: "owner",
+            foreignField: "_id",
+            as: "owner_details",
+            pipeline: [
+              {
+                $lookup: {
+                  from: "subscriptions",
+                  localField: "_id",
+                  foreignField: "channel",
+                  as: "subscribers"
                 }
-            }
-        },
-
-        {
-            $lookup: {
-                from: "likes",
-                localField: "_id",
-                foreignField: "video",
-                as: "Likes"
-            }
-        },
-        {
-            $addFields: {
-                LikesCount: {
-                    $size: "$Likes"
-                },
-                LikedbyMe: {
+              },
+              {
+                $addFields: {
+                  subscribersCount: {
+                    $size: "$subscribers"
+                  },
+                  isSubscribed: {
                     $cond: {
-                        if: { $in: [req.user?._id, "$Likes.likedBy"] },
-                        then: true,
-                        else: false
+                      if: {
+                        $in: [
+                          ObjectId('678554bb24c1fb38ab430408'),
+                          { $map: { input: "$subscribers", as: "sub", in: "$$sub.subscribers" } }
+                        ]
+                      },
+                      then: true,
+                      else: false
                     }
+                  }
                 }
-            }
+              },
+              {
+                $project: {
+                  username: 1,
+                  avatar: 1,
+                  subscribersCount: 1,
+                  isSubscribed: 1
+                }
+              }
+            ]
+          }
         },
         {
-            $project: {
-                LikedbyMe: 1,
-                LikesCount: 1,
-                title: 1,
-                description: 1,
-                createdAt: 1,
-                updatedAt: 1,
-                videoFile: 1,
-                views: 1,
-                duration: 1,
-                comments: 1,
-                owner_details: 1
+          $addFields: {
+            owner_details: {
+              $ifNull: [{ $first: "$owner_details" }, null]
             }
+          }
+        },
+        {
+          $lookup: {
+            from: "likes",
+            localField: "_id",
+            foreignField: "video",
+            as: "Likes"
+          }
+        },
+        {
+          $addFields: {
+            LikesCount: {
+              $size: "$Likes"
+            },
+            LikedbyMe: {
+              $cond: {
+                if: {
+                  $in: [
+                    ObjectId('678554bb24c1fb38ab430408'),
+                    { $map: { input: "$Likes", as: "like", in: "$$like.likedBy" } }
+                  ]
+                },
+                then: true,
+                else: false
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            LikedbyMe: 1,
+            LikesCount: 1,
+            title: 1,
+            description: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            videoFile: 1,
+            views: 1,
+            duration: 1,
+            comments: 1,
+            owner_details: 1
+          }
         }
-
-
-    ])
+      ])
 
     if (!VideoAggreate) {
         throw new ApiError(404, "video Not Found")
