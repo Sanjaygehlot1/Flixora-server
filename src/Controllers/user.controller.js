@@ -91,7 +91,7 @@ const GenerateRefreshAndAccessToken = async (UserId) => {
 
         return { AccessToken, RefreshToken }
     } catch (error) {
-        throw new ApiError(500, "Error while generating refresh or access token")
+        throw new ApiError(500, error.message)
     }
 }
 
