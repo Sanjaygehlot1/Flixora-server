@@ -164,8 +164,9 @@ const GetVideoById = AsyncHandler(async (req, res) => {
     }
 
     const userId = req.user?._id
-
-    const VideoAggreate = await Video.aggregate( [
+    console.log(userId)
+    const VideoAggreate = await Video.aggregate(
+         [
         {
           $match: {
             _id: new mongoose.Types.ObjectId(videoId),
@@ -193,7 +194,7 @@ const GetVideoById = AsyncHandler(async (req, res) => {
                     $cond: {
                       if: {
                         $in: [
-                          userId,
+                          new mongoose.Types.ObjectId(userId),
                           {
                             $map: { input: "$subscribers", as: "sub", in: "$$sub.subscribers" },
                           },
@@ -238,7 +239,7 @@ const GetVideoById = AsyncHandler(async (req, res) => {
               $cond: {
                 if: {
                   $in: [
-                    userId,
+                    new mongoose.Types.ObjectId(userId),
                     {
                         $reduce: {
                           input: "$Likes",
