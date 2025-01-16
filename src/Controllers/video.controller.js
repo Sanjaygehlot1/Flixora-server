@@ -240,12 +240,13 @@ const GetVideoById = AsyncHandler(async (req, res) => {
                   $in: [
                     userId,
                     {
-                      $reduce: {
-                        input: "$Likes",
-                        initialValue: [],
-                        in: { $concatArrays: ["$$value", "$$this.likedBy"] },
-                      },
-                    },
+                        $reduce: {
+                          input: "$Likes",
+                          initialValue: [],
+                          in: { $concatArrays: ["$$value", { $ifNull: [{ $cond: [{ $isArray: "$$this.likedBy" }, "$$this.likedBy", ["$$this.likedBy"]] }, []] }] },
+                        },
+                      }
+                      
                   ],
                 },
                 then: true,
