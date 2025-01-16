@@ -38,10 +38,10 @@ const UserSchema = new Schema({
     refreshToken: {
         type: String
     },
-    watchHistory: {
+    watchHistory: [{
         type: Schema.Types.ObjectId,
         ref: "Video"
-    }
+    }]
 }, {
     timestamps: true
 })
@@ -58,6 +58,8 @@ UserSchema.methods.IsPasswordCorrect = async function (password) {
     
     return await bcrypt.compare(password, this.password)
 }
+
+
 
 UserSchema.methods.generateAccessToken = async function () {
     return jwt.sign({
