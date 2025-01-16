@@ -16,7 +16,7 @@ router.route('/upload-video').post(AuthMiddleware,upload.fields([
     }
 ]),PublishVideo)
 
-router.route("/get-video/:videoId").get(GetVideoById)
+router.route("/get-video/:videoId").get(AuthMiddleware,GetVideoById)
 
 router.route("/search/v/").get(GetAllVideos)
 
