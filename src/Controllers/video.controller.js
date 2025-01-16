@@ -163,115 +163,134 @@ const GetVideoById = AsyncHandler(async (req, res) => {
         throw new ApiError(404, "Video not Found")
     }
 
-    const userId = req.user?._id
-    console.log(userId)
+    const userObjectId = new mongoose.Types.ObjectId(req.user?._id);
+    console.log(userObjectId)
     const VideoAggreate = await Video.aggregate(
-         [
-        {
-          $match: {
-            _id: new mongoose.Types.ObjectId(videoId),
-          },
-        },
-        {
-          $lookup: {
-            from: "users",
-            localField: "owner",
-            foreignField: "_id",
-            as: "owner_details",
-            pipeline: [
-              {
-                $lookup: {
-                  from: "subscriptions",
-                  localField: "_id",
-                  foreignField: "channel",
-                  as: "subscribers",
+        [
+            {
+              $match: {
+                _id: new mongoose.Types.ObjectId(videoId),
+              },
+            },
+            {
+              $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner_details",
+                pipeline: [
+                  {
+                    $lookup: {
+                      from: "subscriptions",
+                      localField: "_id",
+                      foreignField: "channel",
+                      as: "subscribers",
+                    },
+                  },
+                  {
+                    $addFields: {
+                      subscribersCount: { $size: "$subscribers" },
+                      isSubscribed: {
+                        $cond: {
+                          if: {
+                            $in: [
+                              userObjectId,
+                              {
+                                $map: {
+                                  input: "$subscribers",
+                                  as: "sub",
+                                  in: "$$sub.subscribers",
+                                },
+                              },
+                            ],
+                          },
+                          then: true,
+                          else: false,
+                        },
+                      },
+                    },
+                  },
+                  {
+                    $project: {
+                      username: 1,
+                      avatar: 1,
+                      subscribersCount: 1,
+                      isSubscribed: 1,
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              $addFields: {
+                owner_details: {
+                  $ifNull: [{ $first: "$owner_details" }, null],
                 },
               },
-              {
-                $addFields: {
-                  subscribersCount: { $size: "$subscribers" },
-                  isSubscribed: {
-                    $cond: {
-                      if: {
-                        $in: [
-                          new mongoose.Types.ObjectId(userId),
-                          {
-                            $map: { input: "$subscribers", as: "sub", in: "$$sub.subscribers" },
+            },
+            {
+              $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "video",
+                as: "Likes",
+              },
+            },
+            {
+              $addFields: {
+                LikesCount: { $size: "$Likes" },
+                LikedbyMe: {
+                  $cond: {
+                    if: {
+                      $in: [
+                        userObjectId,
+                        {
+                          $reduce: {
+                            input: "$Likes",
+                            initialValue: [],
+                            in: {
+                              $concatArrays: [
+                                "$$value",
+                                {
+                                  $ifNull: [
+                                    {
+                                      $cond: [
+                                        { $isArray: "$$this.likedBy" },
+                                        "$$this.likedBy",
+                                        ["$$this.likedBy"],
+                                      ],
+                                    },
+                                    [],
+                                  ],
+                                },
+                              ],
+                            },
                           },
-                        ],
-                      },
-                      then: true,
-                      else: false,
+                        },
+                      ],
                     },
+                    then: true,
+                    else: false,
                   },
                 },
               },
-              {
-                $project: {
-                  username: 1,
-                  avatar: 1,
-                  subscribersCount: 1,
-                  isSubscribed: 1,
-                },
-              },
-            ],
-          },
-        },
-        {
-          $addFields: {
-            owner_details: {
-              $ifNull: [{ $first: "$owner_details" }, null],
             },
-          },
-        },
-        {
-          $lookup: {
-            from: "likes",
-            localField: "_id",
-            foreignField: "video",
-            as: "Likes",
-          },
-        },
-        {
-          $addFields: {
-            LikesCount: { $size: "$Likes" },
-            LikedbyMe: {
-              $cond: {
-                if: {
-                  $in: [
-                    new mongoose.Types.ObjectId(userId),
-                    {
-                        $reduce: {
-                          input: "$Likes",
-                          initialValue: [],
-                          in: { $concatArrays: ["$$value", { $ifNull: [{ $cond: [{ $isArray: "$$this.likedBy" }, "$$this.likedBy", ["$$this.likedBy"]] }, []] }] },
-                        },
-                      }
-                      
-                  ],
-                },
-                then: true,
-                else: false,
+            {
+              $project: {
+                LikedbyMe: 1,
+                LikesCount: 1,
+                title: 1,
+                description: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                videoFile: 1,
+                views: 1,
+                duration: 1,
+                comments: 1,
+                owner_details: 1,
               },
             },
-          },
-        },
-        {
-          $project: {
-            LikedbyMe: 1,
-            LikesCount: 1,
-            title: 1,
-            description: 1,
-            createdAt: 1,
-            updatedAt: 1,
-            videoFile: 1,
-            views: 1,
-            duration: 1,
-            comments: 1,
-            owner_details: 1,
-          },
-        },
-      ])
+          ])
 
     if (!VideoAggreate) {
         throw new ApiError(404, "video Not Found")
