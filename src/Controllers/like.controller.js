@@ -2,6 +2,7 @@ import {Like} from "../Models/like.model.js"
 import {AsyncHandler} from "../Utils/AsyncHandler.js"
 import {ApiError} from "../Utils/ApiError.js"
 import { ApiResponse } from "../Utils/ApiResponse.js"
+import mongoose from "mongoose"
 
 const ToggleVideoLike = AsyncHandler(async(req,res)=>{
     const {videoId}= req.params
@@ -128,7 +129,7 @@ const GetVideosLikedByUser = AsyncHandler(async (req,res)=>{
     const LikedVideos = await Like.aggregate([
         {
           $match: {
-            likedBy: req.user?._id
+            likedBy: new mongoose.Types.ObjectId(req.user?._id)
           }
         },
         {
@@ -173,6 +174,7 @@ const GetVideosLikedByUser = AsyncHandler(async (req,res)=>{
             "result.description":1,
             "result.duration":1,
            "result.views":1,
+           "result._id":1,
             "result.isPublished":1,
           "result.createdAt":1,
             "result.updatedAt":1,
