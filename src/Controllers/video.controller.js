@@ -163,12 +163,13 @@ const GetVideoById = AsyncHandler(async (req, res) => {
         throw new ApiError(404, "Video not Found")
     }
 
+    const userId = req.user?._id
 
-    const VideoAggreate = await Video.aggregate([
+    const VideoAggreate = await Video.aggregate( [
         {
           $match: {
-            _id: new mongoose.Types.ObjectId(videoId)
-          }
+            _id: new mongoose.Types.ObjectId(videoId),
+          },
         },
         {
           $lookup: {
@@ -182,72 +183,76 @@ const GetVideoById = AsyncHandler(async (req, res) => {
                   from: "subscriptions",
                   localField: "_id",
                   foreignField: "channel",
-                  as: "subscribers"
-                }
+                  as: "subscribers",
+                },
               },
               {
                 $addFields: {
-                  subscribersCount: {
-                    $size: "$subscribers"
-                  },
+                  subscribersCount: { $size: "$subscribers" },
                   isSubscribed: {
                     $cond: {
                       if: {
                         $in: [
-                          req.user?._id,
-                          { $map: { input: "$subscribers", as: "sub", in: "$$sub.subscribers" } }
-                        ]
+                          userId,
+                          {
+                            $map: { input: "$subscribers", as: "sub", in: "$$sub.subscribers" },
+                          },
+                        ],
                       },
                       then: true,
-                      else: false
-                    }
-                  }
-                }
+                      else: false,
+                    },
+                  },
+                },
               },
               {
                 $project: {
                   username: 1,
                   avatar: 1,
                   subscribersCount: 1,
-                  isSubscribed: 1
-                }
-              }
-            ]
-          }
+                  isSubscribed: 1,
+                },
+              },
+            ],
+          },
         },
         {
           $addFields: {
             owner_details: {
-              $ifNull: [{ $first: "$owner_details" }, null]
-            }
-          }
+              $ifNull: [{ $first: "$owner_details" }, null],
+            },
+          },
         },
         {
           $lookup: {
             from: "likes",
             localField: "_id",
             foreignField: "video",
-            as: "Likes"
-          }
+            as: "Likes",
+          },
         },
         {
           $addFields: {
-            LikesCount: {
-              $size: "$Likes"
-            },
+            LikesCount: { $size: "$Likes" },
             LikedbyMe: {
               $cond: {
                 if: {
                   $in: [
-                    req.user?._id,
-                    { $map: { input: "$Likes", as: "like", in: "$$like.likedBy" } }
-                  ]
+                    userId,
+                    {
+                      $reduce: {
+                        input: "$Likes",
+                        initialValue: [],
+                        in: { $concatArrays: ["$$value", "$$this.likedBy"] },
+                      },
+                    },
+                  ],
                 },
                 then: true,
-                else: false
-              }
-            }
-          }
+                else: false,
+              },
+            },
+          },
         },
         {
           $project: {
@@ -261,9 +266,9 @@ const GetVideoById = AsyncHandler(async (req, res) => {
             views: 1,
             duration: 1,
             comments: 1,
-            owner_details: 1
-          }
-        }
+            owner_details: 1,
+          },
+        },
       ])
 
     if (!VideoAggreate) {
