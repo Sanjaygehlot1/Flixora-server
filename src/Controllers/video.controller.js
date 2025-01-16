@@ -167,7 +167,7 @@ const GetVideoById = AsyncHandler(async (req, res) => {
     const VideoAggreate = await Video.aggregate([
         {
           $match: {
-            _id: ObjectId("67828f3624c1fb38ab43013c")
+            _id: new mongoose.Types.ObjectId(videoId)
           }
         },
         {
@@ -194,7 +194,7 @@ const GetVideoById = AsyncHandler(async (req, res) => {
                     $cond: {
                       if: {
                         $in: [
-                          ObjectId('678554bb24c1fb38ab430408'),
+                          req.user?._id,
                           { $map: { input: "$subscribers", as: "sub", in: "$$sub.subscribers" } }
                         ]
                       },
@@ -239,7 +239,7 @@ const GetVideoById = AsyncHandler(async (req, res) => {
               $cond: {
                 if: {
                   $in: [
-                    ObjectId('678554bb24c1fb38ab430408'),
+                    req.user?._id,
                     { $map: { input: "$Likes", as: "like", in: "$$like.likedBy" } }
                   ]
                 },
