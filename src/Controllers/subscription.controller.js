@@ -128,7 +128,7 @@ const GetUserChannelSubscribers = AsyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(
       200,
-      {},
+      [],
       "No subscribers Found"
     ))
 
@@ -204,7 +204,7 @@ const GetChannelsSubscribedTo = AsyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(
       200,
-      {},
+      [],
       "No Channels Subscribed by user"
     ))
 
