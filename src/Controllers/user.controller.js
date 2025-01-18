@@ -455,49 +455,47 @@ const GetWatchHistory = AsyncHandler(async (req, res) => {
                 from: "videos",
                 localField: "watchHistory",
                 foreignField: "_id",
-                as: "Result"
-              }
-            },
-            {
-              $unwind: {
-                path: "$Result",
-                preserveNullAndEmptyArrays: true
+                as: "videos"
               }
             },
             {
               $lookup: {
                 from: "users",
-                localField: "Result.owner",
+                localField: "videos.owner",
                 foreignField: "_id",
-                as: "owner_details"
+                as: "owners"
               }
             },
             {
-              $addFields: {
-                owner_details: {
-                  $arrayElemAt: ["$owner_details", 0]
-                }
-              }
-            },
-            {
-              $group: {
-                _id: "$_id",
-                username: { $first: "$username" },
-                email: { $first: "$email" },
+              $project: {
+                username: 1,
+                email: 1,
                 watchHistory: {
-                  $push: {
-                    videoId: "$Result._id",
-                    title: "$Result.title",
-                    description: "$Result.description",
-                    videoFile: "$Result.videoFile",
-                    thumbnail: "$Result.thumbnail",
-                    createdAt: "$Result.createdAt",
-                    views: "$Result.views",
-                    duration: "$Result.duration",
-                    isPublished: "$Result.isPublished",
-                    owner: {
-                      username: "$owner_details.username",
-                      avatar: "$owner_details.avatar"
+                  $map: {
+                    input: "$videos",
+                    as: "video",
+                    in: {
+                      videoId: "$$video._id",
+                      title: "$$video.title",
+                      description: "$$video.description",
+                      videoFile: "$$video.videoFile",
+                      thumbnail: "$$video.thumbnail",
+                      createdAt: "$$video.createdAt",
+                      views: "$$video.views",
+                      duration: "$$video.duration",
+                      isPublished: "$$video.isPublished",
+                      owner: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$owners",
+                              as: "owner",
+                              cond: { $eq: ["$$owner._id", "$$video.owner"] }
+                            }
+                          },
+                          0
+                        ]
+                      }
                     }
                   }
                 }
