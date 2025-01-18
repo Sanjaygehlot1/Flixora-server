@@ -446,60 +446,64 @@ const GetWatchHistory = AsyncHandler(async (req, res) => {
 
         const History = await User.aggregate([
             {
-                $match: {
-                    _id: new mongoose.Types.ObjectId(req.user?._id)
-                }
+              $match: {
+                _id: new mongoose.Types.ObjectId(req.user?._id)
+              }
             },
             {
-                $lookup: {
-                    from: "videos",
-                    localField: "watchHistory",
-                    foreignField: "_id",
-                    as: "Result"
-                }
+              $lookup: {
+                from: "videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "Result"
+              }
             },
             {
-                $unwind: {
-                    path: "$Result",
-                    preserveNullAndEmptyArrays: true
-                }
+              $unwind: {
+                path: "$Result",
+                preserveNullAndEmptyArrays: true
+              }
             },
             {
-                $lookup: {
-                    from: "users",
-                    localField: "Result.owner",
-                    foreignField: "_id",
-                    as: "owner_details"
-                }
+              $lookup: {
+                from: "users",
+                localField: "Result.owner",
+                foreignField: "_id",
+                as: "owner_details"
+              }
             },
             {
-                $addFields: {
-                    owner_details: {
-                        $arrayElemAt: ["$owner_details", 0]
+              $addFields: {
+                owner_details: {
+                  $arrayElemAt: ["$owner_details", 0]
+                }
+              }
+            },
+            {
+              $group: {
+                _id: "$_id",
+                username: { $first: "$username" },
+                email: { $first: "$email" },
+                watchHistory: {
+                  $push: {
+                    videoId: "$Result._id",
+                    title: "$Result.title",
+                    description: "$Result.description",
+                    videoFile: "$Result.videoFile",
+                    thumbnail: "$Result.thumbnail",
+                    createdAt: "$Result.createdAt",
+                    views: "$Result.views",
+                    duration: "$Result.duration",
+                    isPublished: "$Result.isPublished",
+                    owner: {
+                      username: "$owner_details.username",
+                      avatar: "$owner_details.avatar"
                     }
+                  }
                 }
-            },
-            {
-                $group: {
-                    _id: "$_id",
-                    username: { $first: "$username" },
-                    email: { $first: "$email" },
-                    watchHistory: {
-                        $push: {
-                            videoId: "$Result._id",
-                            title: "$Result.title",
-                            description: "$Result.description",
-                            videoFile: "$Result.videoFile",
-                            thumbnail: "$Result.thumbnail",
-                            views: "$Result.views",
-                            duration: "$Result.duration",
-                            isPublished: "$Result.isPublished",
-                            owner: "$owner_details"
-                        }
-                    }
-                }
+              }
             }
-        ])
+          ])
 
         if(!History){
             throw new ApiError(400, "Error while Fetching Watch History")
