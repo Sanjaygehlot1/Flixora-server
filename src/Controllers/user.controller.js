@@ -416,7 +416,8 @@ const GetChannelDetails = AsyncHandler(async (req, res) => {
                 subscribedToCount: 1,
                 subscribersCount: 1,
                 avatar: 1,
-                coverimage: 1
+                coverimage: 1,
+                username: 1
             }
         }
     ])
