@@ -203,7 +203,8 @@ const GetUserTweets = AsyncHandler(async (req, res) => {
                 content: 1,
                 owner: 1,
                 image: 1,
-                Likes_count: 1
+                Likes_count: 1,
+                createdAt :1
             }
         }
     ])
