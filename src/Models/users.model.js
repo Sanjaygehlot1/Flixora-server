@@ -40,7 +40,8 @@ const UserSchema = new Schema({
     },
     watchHistory: [{
         type: Schema.Types.ObjectId,
-        ref: "Video"
+        ref: "Video",
+        
     }]
 }, {
     timestamps: true

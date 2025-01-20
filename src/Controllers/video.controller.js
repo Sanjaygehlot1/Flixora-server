@@ -51,6 +51,11 @@ const GetAllVideos = AsyncHandler(async (req, res) => {
             },
         },
         {
+          $sort: {
+            createdAt: -1 
+          }
+        },
+        {
             $project: {
                 _id: 1,
                 duration: 1,

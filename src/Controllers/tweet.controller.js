@@ -132,8 +132,8 @@ const DeleteTweet = AsyncHandler(async (req, res) => {
 
     try {
         await Tweet.findByIdAndDelete(tweetId)
-        await Like.deleteMany({tweet : new mongoose.Types.ObjectId(tweetId)})
-        
+        await Like.deleteMany({ tweet: new mongoose.Types.ObjectId(tweetId) })
+
 
         return res
             .status(200)
@@ -151,8 +151,8 @@ const DeleteTweet = AsyncHandler(async (req, res) => {
 
 })
 
-const GetUserTweets = AsyncHandler(async (req,res)=>{
-    const {userId} = req.params
+const GetUserTweets = AsyncHandler(async (req, res) => {
+    const { userId } = req.params
 
     if (!isValidObjectId(userId)) {
         throw new ApiError(301, "Invalid Id")
@@ -165,63 +165,67 @@ const GetUserTweets = AsyncHandler(async (req,res)=>{
 
     const UserTweets = await Tweet.aggregate([
         {
-          $match: {
-            owner: new mongoose.Types.ObjectId(userId)
-          }
-        },
-        {
-          $lookup: {
-            from: "likes",
-            localField: "_id",
-            foreignField: "tweet",
-            as: "Likes_details",
-            pipeline: [
-              {
-                $project: {
-                  tweet: 1,
-                  likedBy: 1
-                }
-              }
-            ]
-          }
-        },
-        {
-          $addFields: {
-            Likes_count: {
-             $size: "$Likes_details"
+            $match: {
+                owner: new mongoose.Types.ObjectId(userId)
             }
-          }
         },
-      
         {
-          $project: {
-            Likes_details: 1,
-            content: 1,
-            owner: 1,
-            image: 1,
-            Likes_count:1
-          }
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "tweet",
+                as: "Likes_details",
+                pipeline: [
+                    {
+                        $project: {
+                            tweet: 1,
+                            likedBy: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                Likes_count: {
+                    $size: "$Likes_details"
+                }
+            }
+        },
+        {
+            $sort: {
+                createdAt: -1
+            }
+        },
+        {
+            $project: {
+                Likes_details: 1,
+                content: 1,
+                owner: 1,
+                image: 1,
+                Likes_count: 1
+            }
         }
-      ])
+    ])
 
-      if(Array.isArray(UserTweets) && UserTweets.length === 0){
+    if (Array.isArray(UserTweets) && UserTweets.length === 0) {
         return res
+            .status(200)
+            .json(new ApiResponse(
+                200,
+                [],
+                "User has 0 Tweets"
+            ))
+    }
+
+
+    return res
         .status(200)
         .json(new ApiResponse(
             200,
-            {},
-            "User has 0 Tweets"
+            UserTweets,
+            "All Tweets Fetched Successfully"
         ))
-      }
-
-
-      return res
-      .status(200)
-      .json(new ApiResponse(
-          200,
-          UserTweets,
-          "All Tweets Fetched Successfully"
-      ))
 
 
 

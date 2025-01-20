@@ -73,6 +73,13 @@ const GetAllCommentsOfAVideo = AsyncHandler(async (req, res) => {
                 }
             }
         },
+        {
+
+            $sort: {
+                createdAt: -1
+            }
+
+        }
 
     ]
     const options = {
@@ -230,8 +237,8 @@ const DeleteComment = AsyncHandler(async (req, res) => {
 
 
     await Comment.findByIdAndDelete(commentId)
-    await Like.deleteMany({comment : new mongoose.Types.ObjectId(commentId)})
-    
+    await Like.deleteMany({ comment: new mongoose.Types.ObjectId(commentId) })
+
 
     return res
         .status(200)

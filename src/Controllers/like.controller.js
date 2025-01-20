@@ -127,65 +127,70 @@ const ToggleTweetLike = AsyncHandler(async (req,res)=>{
 const GetVideosLikedByUser = AsyncHandler(async (req,res)=>{
 
     const LikedVideos = await Like.aggregate([
-        {
-          $match: {
-            likedBy: new mongoose.Types.ObjectId(req.user?._id)
-          }
-        },
-        {
-          $lookup: {
-            from: "videos",
-            localField: "video",
-            foreignField: "_id",
-            as: "result"
-          }
-        },
-        {
-          $addFields: {
-            result: {
-              $arrayElemAt: ["$result", 0]
-            }
-          }
-        },
-        {
-          $lookup: {
-            from: "users",
-            localField: "result.owner",
-            foreignField: "_id",
-            as: "Owner"
-          }
-        },
-        {
-          $addFields: {
-            Owner: {
-              $arrayElemAt: ["$Owner", 0]
-            }
-          }
-        },
-        {
-            $sort: {
-                createdAt: -1
-            }
-        },
-        {
-          $project: {
-            
-           "result.title":1,
-            "result.description":1,
-            "result.duration":1,
-           "result.views":1,
-           "result._id":1,
-            "result.isPublished":1,
-          "result.createdAt":1,
-            "result.updatedAt":1,
-           "Owner.username":1,
-            "Owner.avatar":1,
-            "result.videoFile.url":1,
-          "result.thumbnail.url":1
-            
+      {
+        $match: {
+          likedBy: new mongoose.Types.ObjectId(req.user?._id)
+        }
+      },
+      {
+        $lookup: {
+          from: "videos",
+          localField: "video",
+          foreignField: "_id",
+          as: "result"
+        }
+      },
+      {
+        $addFields: {
+          result: {
+            $arrayElemAt: ["$result", 0]
           }
         }
-      ])
+      },
+      {
+        $match: {
+          "result._id": {
+            $exists: true
+          } 
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "result.owner",
+          foreignField: "_id",
+          as: "Owner"
+        }
+      },
+      {
+        $addFields: {
+          Owner: {
+            $arrayElemAt: ["$Owner", 0] 
+          }
+        }
+      },
+      {
+        $sort: {
+          createdAt: -1 
+        }
+      },
+      {
+        $project: {
+          "result.title": 1,
+          "result.description": 1,
+          "result.duration": 1,
+          "result.views": 1,
+          "result._id": 1,
+          "result.isPublished": 1,
+          "result.createdAt": 1,
+          "result.updatedAt": 1,
+          "Owner.username": 1,
+          "Owner.avatar": 1,
+          "result.videoFile.url": 1,
+          "result.thumbnail.url": 1
+        }
+      }
+    ])
 
       return res
       .status(200)
