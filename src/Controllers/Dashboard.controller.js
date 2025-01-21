@@ -37,6 +37,33 @@ const GetChannelVideos = AsyncHandler(async (req,res)=>{
 
 })
 
+const GetAllVideos = AsyncHandler(async (req,res)=>{
+  const {ChannelId} = req.params
+  // Channel means user so, ChannelId === UserId
+  if(!isValidObjectId(ChannelId)){
+      throw new ApiError(401, "Channel Id Invalid")
+  }
+  if(!ChannelId){
+      throw new ApiError(401, "Channel Id not found")
+  }
+
+  const Videos = await Video.find({
+      owner: new mongoose.Types.ObjectId(ChannelId),
+  }).select("-videoFile.public_id -thumbnail.public_id -updatedAt")
+
+
+  if(!Videos){
+      throw new ApiError(401, "No videos Found")
+  }
+  return res
+  .status(200)
+  .json(new ApiResponse(
+      200,
+      Videos,
+      "All Videos Fetched Successfully"
+  ))
+})
+
 
 const GetChannelStats = AsyncHandler(async (req,res)=>{
 
@@ -164,5 +191,6 @@ const GetChannelStats = AsyncHandler(async (req,res)=>{
 
 export {
     GetChannelStats,
-    GetChannelVideos
+    GetChannelVideos,
+    GetAllVideos
 }
