@@ -48,7 +48,7 @@ const UpdatePlaylist = AsyncHandler(async (req, res) => {
     const PlaylistToBeUpdated = await Playlist.findById(playlistId)
 
     if (PlaylistToBeUpdated.owner.toString() !== req.user?._id.toString()) {
-        throw new ApiError(404, "Unauthorized Access :: you don't have permission to add videos to this playlist")
+        throw new ApiError(404, "Unauthorized Access :: you don't have permission to Edit this playlist")
     }
 
     const UpdatedPlaylist = await Playlist.findByIdAndUpdate(playlistId,
@@ -142,7 +142,7 @@ const RemoveVideoFromPlaylist = AsyncHandler(async (req, res) => {
     }
 
     if (!videoId || !playlistId) {
-        throw new ApiError(404, "Video adn playlist IDs not found")
+        throw new ApiError(404, "Video and playlist IDs not found")
 
     }
 
@@ -306,130 +306,115 @@ const GetPlaylistById =  AsyncHandler(async (req,res)=>{
     }
 
     const playlist = await Playlist.aggregate([
-        {
-          $match: {
-            _id: new mongoose.Types.ObjectId(playlistId)
-          }
-        },
-        {
-          $lookup: {
-            from: "videos",
-            localField: "videos",
-            foreignField: "_id",
-            as: "videos"
-          }
-        },
-        {
-          $addFields: {
-            TotalVideos: {
-              $size: "$videos"
-            }
-          }
-        },
-        {
-          $addFields: {
-            TotalViews: {
-              $sum: "$videos.views"
-            }
-          }
-        },
-        {
-          $lookup: {
-            from: "users",
-            localField: "owner",
-            foreignField: "_id",
-            as: "Playlist_owner",
-            pipeline: [
-              {
-                $project: {
-                  username: 1,
-                  avatar: 1
-                }
+      {
+        $match: {
+          _id:new mongoose.Types.ObjectId(playlistId)
+        }
+      },
+      {
+        $lookup: {
+          from: "videos",
+          localField: "videos",
+          foreignField: "_id",
+          as: "videos"
+        }
+      },
+      {
+        $addFields: {
+          TotalVideos: { $size: "$videos" }
+        }
+      },
+      {
+        $addFields: {
+          TotalViews: { $sum: "$videos.views" }
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "Playlist_owner",
+          pipeline: [
+            {
+              $project: {
+                username: 1,
+                avatar: 1
               }
-            ]
-          }
-        },
-        {
-            $addFields:{
-                Playlist_owner: {
-                    $arrayElemAt:["$Playlist_owner",0]
-                }
             }
-        },
-        {
-          $unwind: {
-            path: "$videos",
-            preserveNullAndEmptyArrays: true
-          }
-        },
-        {
-          $lookup: {
-            from: "users",
-            localField: "videos.owner",
-            foreignField: "_id",
-            as: "videos.ownerDetails",
-            pipeline: [
-              {
-                $project: {
-                  username: 1,
-                  avatar: 1
-                }
+          ]
+        }
+      },
+      {
+        $addFields: {
+          Playlist_owner: { $arrayElemAt: ["$Playlist_owner", 0] }
+        }
+      },
+      {
+        $unwind: {
+          path: "$videos",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "videos.owner",
+          foreignField: "_id",
+          as: "videos.ownerDetails",
+          pipeline: [
+            {
+              $project: {
+                username: 1,
+                avatar: 1
               }
-            ]
-          }
-        },
-        {
-          $group: {
-            _id: "$_id",
-            TotalVideos: {
-              $first: "$TotalVideos"
-            },
-            TotalViews: {
-              $first: "$TotalViews"
-            },
-            name: {
-              $first: "$name"
-            },
-            description: {
-              $first: "$description"
-            },
-            createdAt: {
-              $first: "$createdAt"
-            },
-            Playlist_owner: {
-              $first: "$Playlist_owner"
-            },
-            videos: {
-              $push: "$videos"
             }
-          }
-        },
-        {
-          $project: {
-            TotalVideos: 1,
-            TotalViews: 1,
-            name: 1,
-            description: 1,
-            createdAt: 1,
-            videos: {
-              videoFile: {
-                url: 1
-              },
-              thumbnail: {
-                url: 1
-              },
-              duration: 1,
-              views: 1,
-              title: 1,
-              description: 1,
-              isPublished: 1,
-              createdAt: 1,
-              ownerDetails: 1
-            },
-            Playlist_owner: 1
+          ]
+        }
+      },
+      {
+        $group: {
+          _id: "$_id",
+          TotalVideos: { $first: "$TotalVideos" },
+          TotalViews: { $first: "$TotalViews" },
+          name: { $first: "$name" },
+          description: { $first: "$description" },
+          createdAt: { $first: "$createdAt" },
+          Playlist_owner: { $first: "$Playlist_owner" },
+          videos: { $push: "$videos" }
+        }
+      },
+      {
+        $addFields: {
+          videos: {
+            $ifNull: ["$videos", []] 
           }
         }
-      ])
+      },
+      {
+        $project: {
+          TotalVideos: 1,
+          TotalViews: 1,
+          name: 1,
+          description: 1,
+          createdAt: 1,
+          Playlist_owner: 1,
+          videos: {
+            _id: 1, // Explicitly include video IDs
+            videoFile: { url: 1 },
+            thumbnail: { url: 1 },
+            duration: 1,
+            views: 1,
+            title: 1,
+            description: 1,
+            isPublished: 1,
+            createdAt: 1,
+            ownerDetails: 1
+          }
+        }
+      }
+    ]
+    )
 
 
       if(Array.isArray(playlist) && playlist.length === 0){
