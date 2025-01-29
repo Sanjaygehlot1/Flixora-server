@@ -400,7 +400,7 @@ const GetPlaylistById =  AsyncHandler(async (req,res)=>{
           createdAt: 1,
           Playlist_owner: 1,
           videos: {
-            _id: 1, // Explicitly include video IDs
+            _id: 1, 
             videoFile: { url: 1 },
             thumbnail: { url: 1 },
             duration: 1,
