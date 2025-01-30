@@ -6,6 +6,7 @@ import { ApiResponse } from '../Utils/ApiResponse.js'
 import mongoose from "mongoose";
 import { User } from "../Models/users.model.js";
 import { Like } from "../Models/like.model.js";
+import { Playlist } from "../Models/playlist.model.js";
 
 const GetAllVideos = AsyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query } = req.query
@@ -420,7 +421,15 @@ const DeleteVideo = AsyncHandler(async (req, res) => {
   if (video.owner.toString() === req.user?._id.toString()) {
     await Video.findByIdAndDelete(videoId)
     await Like.deleteMany({ video: new mongoose.Types.ObjectId(videoId) })
-
+    await Playlist.updateMany(
+      { videos: videoId }, 
+      { $pull: { videos: videoId } }
+    )
+    await User.updateMany(
+      { watchHistory: videoId }, 
+      { $pull: { watchHistory: videoId } }
+    )
+    
     await DeleteVideoOnCloudinary(video.videoFile.public_id).then(() => {
     }).catch((err) => {
       console.log(err.message)

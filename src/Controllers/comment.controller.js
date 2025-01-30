@@ -2,6 +2,7 @@ import { Comment } from '../Models/comment.model.js'
 import { AsyncHandler } from '../Utils/AsyncHandler.js'
 import { ApiResponse } from '../Utils/ApiResponse.js'
 import { ApiError } from '../Utils/ApiError.js'
+import {Like} from '../Models/like.model.js'
 import mongoose from 'mongoose'
 
 
