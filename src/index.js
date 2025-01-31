@@ -11,7 +11,6 @@ dotenv.config({
 DBconnect().then(() => {
     app.listen(process.env.PORT, () => {
         console.log("App listening at port::", process.env.PORT)
-        console.log( process.env.CORS_ORIGIN)
     })
 }
 ).catch((error) => {

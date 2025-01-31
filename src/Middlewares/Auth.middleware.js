@@ -5,7 +5,6 @@ import jwt from 'jsonwebtoken'
 const AuthMiddleware = AsyncHandler(async (req,res,next)=>{
     try {
         const token = await req.cookies?.accessToken
-        console.log(token)
         if(!token){
             throw new ApiError(401, "Unauthorized Access")
         }
@@ -16,7 +15,6 @@ const AuthMiddleware = AsyncHandler(async (req,res,next)=>{
         if(!user){
             throw new ApiError(404, "User Not Found")
         }
-        console.log("AuthMiddleware 19:::", user)
         req.user = user
         next()
     } catch (error) {

@@ -18,7 +18,6 @@ const uploadoncloudinary = async (filepath) => {
         })
         //file uploaded successfully
 
-        // console.log("file is uploaded successfully on cloudinary", response)
         fs.unlinkSync(filepath)
         return response;
     } catch (error) {
@@ -36,7 +35,6 @@ const DeleteImageOnCloudinary = async (public_id)=>{
     const deleted = await cloudinary.uploader.destroy(public_id,{
         resource_type:"image"
     })
-    console.log(deleted)
     return deleted
     } catch (error) {
         throw new ApiError(401,error.message)
@@ -49,7 +47,6 @@ const DeleteVideoOnCloudinary = async (public_id)=>{
     const deleted = await cloudinary.uploader.destroy(public_id,{
         resource_type:"video"
     })
-    console.log(deleted)
     return deleted
     } catch (error) {
         throw new ApiError(401,error.message)

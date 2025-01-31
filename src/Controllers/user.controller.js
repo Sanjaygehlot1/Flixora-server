@@ -8,18 +8,9 @@ import mongoose from "mongoose";
 
 
 const RegisterUser = AsyncHandler(async (req, res) => {
-    // get user details from frontend
-    // validation - not empty
-    // check if user already exists: username, email
-    // check for images, check for avatar
-    // upload them to cloudinary, avatar
-    // create user object - create entry in db
-    // remove password and refresh token field from response
-    // check for user creation
-    // return res
+    
 
     const { fullname, email, password, username } = req.body
-    // console.log(req.body)
     if ([fullname, email, password, username].some((value) => value?.trim() === "")) {
         throw new ApiError(400, "All Fields are required!!")
     }
@@ -32,7 +23,6 @@ const RegisterUser = AsyncHandler(async (req, res) => {
     }
 
     const AvatarLocalPath = req.files?.avatar[0]?.path;
-    // const CoverImageLocalPath = req.files?.coverimage[0]?.path;
 
     let CoverImageLocalPath;
     if (req.files.coverimage && Array.isArray(req.files.coverimage) && req.files.coverimage.length > 0) {
@@ -40,12 +30,14 @@ const RegisterUser = AsyncHandler(async (req, res) => {
     }
 
 
-    // console.log(req.files)
     if (!AvatarLocalPath) {
         throw new ApiError(400, "Avatar is Required")
     }
     const Avatar = await uploadoncloudinary(AvatarLocalPath)
-    const CoverImage = await uploadoncloudinary(CoverImageLocalPath)
+    let CoverImage;
+    if(CoverImageLocalPath){
+         CoverImage = await uploadoncloudinary(CoverImageLocalPath)
+    }
 
     if (!Avatar) {
         throw new ApiError(400, "Avatar is Required!!")
@@ -83,8 +75,6 @@ const GenerateRefreshAndAccessToken = async (UserId) => {
         const AccessToken = await user.generateAccessToken()
         const RefreshToken = await user.generateRefreshToken()
 
-        // console.log("AccessToken::",AccessToken)
-        // console.log("RefreshToken::",RefreshToken)
 
         user.refreshToken = RefreshToken
         await user.save({ ValidateBeforeSave: true })
@@ -97,14 +87,7 @@ const GenerateRefreshAndAccessToken = async (UserId) => {
 
 
 const LoginUser = AsyncHandler(async (req, res) => {
-
-    // data from req.body
-    //check if empty - username email
-    //find user data in db
-    //check if pass is correct
-    //access and refresh token
-    //remove pass and refresh token from data
-    //send the response and login 
+ 
 
 
     const { username, email, password } = req.body

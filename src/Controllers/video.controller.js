@@ -170,7 +170,6 @@ const GetVideoById = AsyncHandler(async (req, res) => {
   }
 
   const userObjectId = new mongoose.Types.ObjectId(req.user?._id);
-  console.log(userObjectId)
   const VideoAggreate = await Video.aggregate(
     [
       {
@@ -399,7 +398,6 @@ const UpdateVideo = AsyncHandler(async (req, res) => {
 
 
 
-  // console.log(ThumbnailonCloudinary)
 
 
 
