@@ -101,7 +101,7 @@ const LoginUser = AsyncHandler(async (req, res) => {
     })
 
     if (!user) {
-        throw new ApiError(400, "User not found")
+        throw new ApiError(400, "Invalid User Credentials")
     }
 
 
