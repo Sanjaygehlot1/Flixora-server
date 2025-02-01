@@ -9,7 +9,7 @@ import { Like } from "../Models/like.model.js";
 import { Playlist } from "../Models/playlist.model.js";
 
 const GetAllVideos = AsyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, query } = req.query
+  const { page = 1, limit = 12, query } = req.query
 
   let pipeline = []
 

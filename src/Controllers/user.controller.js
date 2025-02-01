@@ -313,7 +313,7 @@ const UpdateAvatar = AsyncHandler(async (req, res) => {
 
 const UpdateCoverImage = AsyncHandler(async (req, res) => {
     const CoverImageLocalPath = req.file?.path
-
+    
     if (!CoverImageLocalPath) {
         throw new ApiError(400, "CoverImage File is Missing")
     }
