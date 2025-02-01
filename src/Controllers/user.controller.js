@@ -263,12 +263,14 @@ const UpdateUserDetails = AsyncHandler(async (req, res) => {
         throw new ApiError(409, "Email already Exist. Please try with another email.")
     }
 
+    const previousdata = await User.findById(req.user?._id)
+
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
-                fullname: fullname,
-                email: email
+                fullname: fullname || previousdata.fullname ,
+                email: email || previousdata.email
             }
         },
         {
