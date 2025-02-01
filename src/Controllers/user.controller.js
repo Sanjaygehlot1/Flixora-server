@@ -254,9 +254,7 @@ const UpdateUserDetails = AsyncHandler(async (req, res) => {
         throw new ApiError(400, "Fullname or Email is required");
     }
 
-    if ([fullname, email].some((value) => value?.trim() === "")) {
-        throw new ApiError(400, "Fullname or Email is required!!")
-    }
+    
 
     const existingUser = await User.findOne({
         email : email
