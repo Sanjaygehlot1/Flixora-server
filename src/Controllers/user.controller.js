@@ -255,9 +255,9 @@ const UpdateUserDetails = AsyncHandler(async (req, res) => {
     }
 
     
-
+    
     const existingUser = await User.findOne({
-        email : email
+        email : email.trim()
     })
     if (existingUser) {
         throw new ApiError(409, "Email already Exist. Please try with another email.")
@@ -269,8 +269,8 @@ const UpdateUserDetails = AsyncHandler(async (req, res) => {
         req.user?._id,
         {
             $set: {
-                fullname: fullname || previousdata.fullname ,
-                email: email || previousdata.email
+                fullname: fullname.trim() === "" ? previousdata.fullname : fullname ,
+                email: email.trim() === "" ? previousdata.email : email
             }
         },
         {
