@@ -254,6 +254,17 @@ const UpdateUserDetails = AsyncHandler(async (req, res) => {
         throw new ApiError(400, "Fullname or Email is required");
     }
 
+    if ([fullname, email].some((value) => value?.trim() === "")) {
+        throw new ApiError(400, "Fullname or Email is required!!")
+    }
+
+    const existingUser = await User.findOne({
+        email : email
+    })
+    if (existingUser) {
+        throw new ApiError(409, "Email already Exist. Please try with another email.")
+    }
+
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
@@ -313,7 +324,7 @@ const UpdateAvatar = AsyncHandler(async (req, res) => {
 
 const UpdateCoverImage = AsyncHandler(async (req, res) => {
     const CoverImageLocalPath = req.file?.path
-    
+
     if (!CoverImageLocalPath) {
         throw new ApiError(400, "CoverImage File is Missing")
     }
