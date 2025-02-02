@@ -162,7 +162,7 @@ const PublishVideo = AsyncHandler(async (req, res) => {
 
 })
 
-const GetVideoById = AsyncHandler(async (req, res) => {
+const GetVideoByIdAuth = AsyncHandler(async (req, res) => {
   const { videoId } = req.params
 
   if (!videoId) {
@@ -308,12 +308,118 @@ const GetVideoById = AsyncHandler(async (req, res) => {
     }
   )
   if (req.user?._id) {
+    
     await User.findByIdAndUpdate(req.user?._id, {
       $addToSet: {
         watchHistory: videoId
       }
     })
   }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(
+      200,
+      VideoAggreate[0],
+      "Video Fetched Successfully"
+    ))
+
+
+
+})
+const GetVideoById  = AsyncHandler(async (req, res) => {
+  const { videoId } = req.params
+
+  if (!videoId) {
+    throw new ApiError(404, "Video not Found")
+  }
+
+  const VideoAggreate = await Video.aggregate(
+    [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(videoId),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "owner_details",
+          pipeline: [
+            {
+              $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers",
+              },
+            },
+            {
+              $addFields: {
+                subscribersCount: { $size: "$subscribers" },
+               
+              },
+            },
+            {
+              $project: {
+                username: 1,
+                avatar: 1,
+                subscribersCount: 1
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          owner_details: {
+            $ifNull: [{ $first: "$owner_details" }, null],
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "video",
+          as: "Likes",
+        },
+      },
+      {
+        $addFields: {
+          LikesCount: { $size: "$Likes" },
+          
+        },
+      },
+      {
+        $project: {
+          LikesCount: 1,
+          title: 1,
+          description: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          videoFile: 1,
+          views: 1,
+          duration: 1,
+          comments: 1,
+          owner_details: 1,
+          thumbnail: 1
+        },
+      },
+    ])
+
+  if (!VideoAggreate) {
+    throw new ApiError(404, "video Not Found")
+  }
+
+  await Video.findByIdAndUpdate(videoId,
+    {
+      $inc: { views: 1 }
+    }
+  )
+  
 
   return res
     .status(200)
@@ -489,6 +595,7 @@ const TogglePublishStatus = AsyncHandler(async (req, res) => {
 export {
   PublishVideo,
   GetVideoById,
+  GetVideoByIdAuth,
   UpdateVideo,
   DeleteVideo,
   TogglePublishStatus,

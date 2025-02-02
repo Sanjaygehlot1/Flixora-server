@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { AuthMiddleware } from "../Middlewares/Auth.middleware.js";
-import { PublishVideo,GetVideoById, UpdateVideo, DeleteVideo, TogglePublishStatus, GetAllVideos } from "../Controllers/video.controller.js";
+import { PublishVideo,GetVideoById, UpdateVideo, DeleteVideo, TogglePublishStatus, GetAllVideos, GetVideoByIdAuth } from "../Controllers/video.controller.js";
 import {upload } from '../Middlewares/multer.middleware.js'
 
 const router = Router()
@@ -16,7 +16,8 @@ router.route('/upload-video').post(AuthMiddleware,upload.fields([
     }
 ]),PublishVideo)
 
-router.route("/get-video/:videoId").get(AuthMiddleware,GetVideoById)
+router.route("/get-video/:videoId").get(GetVideoById)
+router.route("/get-video-auth/:videoId").get(AuthMiddleware,GetVideoByIdAuth)
 
 router.route("/search/v/").get(GetAllVideos)
 
