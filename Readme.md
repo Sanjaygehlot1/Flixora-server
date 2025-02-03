@@ -50,7 +50,7 @@ Flixora is a **YouTube-like video streaming platform** built using the **MERN st
 
 - **Clone the repository:**
   
-  git clone https://github.com/Sanjaygehlot1/flixora-backend.git
+  git clone https://github.com/Sanjaygehlot1/Flixora-server.git
 
   cd flixora-backend
 
@@ -88,7 +88,7 @@ Flixora is a **YouTube-like video streaming platform** built using the **MERN st
 ### Frontend Setup
 - **Clone the repository:**
 
-    git clone https://github.com/Sanjaygehlot1/flixora-frontend.git
+    git clone https://github.com/Sanjaygehlot1/Flixora-client.git
 
     cd flixora-frontend
 
